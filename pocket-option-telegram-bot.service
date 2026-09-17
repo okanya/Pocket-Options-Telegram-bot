@@ -1,0 +1,16 @@
+[Unit]
+Description=Pocket Option Telegram Bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/pocket-option-telegram-bot
+EnvironmentFile=/opt/pocket-option-telegram-bot/.env
+ExecStart=/opt/pocket-option-telegram-bot/.venv/bin/python -m app.main
+Restart=always
+RestartSec=10
+User=botuser
+
+[Install]
+WantedBy=multi-user.target

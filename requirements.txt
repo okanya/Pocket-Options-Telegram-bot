@@ -1,0 +1,12 @@
+aiogram>=3.0
+SQLAlchemy>=2.0
+asyncpg
+alembic
+pydantic>=2.0
+pydantic-settings
+python-dotenv
+pandas
+numpy
+pytest
+pytest-asyncio
+ruff

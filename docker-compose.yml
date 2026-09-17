@@ -1,0 +1,67 @@
+services:
+  app:
+    build:
+      context: .
+    restart: unless-stopped
+    profiles:
+      - app
+    environment:
+      APP_ENV: ${APP_ENV:-local}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-pocket_bot}:${POSTGRES_PASSWORD:-change_me}@postgres:5432/${POSTGRES_DB:-pocket_bot}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_ADMIN_IDS: ${TELEGRAM_ADMIN_IDS:-}
+      TELEGRAM_NOTIFY_CHAT_ID: ${TELEGRAM_NOTIFY_CHAT_ID:-}
+      POCKET_OPTION_PROXY: ${POCKET_OPTION_PROXY:-}
+      POCKET_OPTION_USE_ENV_PROXY: ${POCKET_OPTION_USE_ENV_PROXY:-false}
+      POCKET_OPTION_WS_URL: ${POCKET_OPTION_WS_URL:-}
+      POCKET_OPTION_WS_TIMEOUT_SECONDS: ${POCKET_OPTION_WS_TIMEOUT_SECONDS:-60}
+      POCKET_OPTION_WS_HEARTBEAT_SECONDS: ${POCKET_OPTION_WS_HEARTBEAT_SECONDS:-20}
+      SIGNAL_ONLY: ${SIGNAL_ONLY:-true}
+      TRADING_ENABLED: ${TRADING_ENABLED:-false}
+      PAPER_TRADING: ${PAPER_TRADING:-false}
+      QT_ACCOUNT_MODE: ${QT_ACCOUNT_MODE:-demo}
+      REAL_TRADING_UNLOCKED: ${REAL_TRADING_UNLOCKED:-false}
+      REAL_TRADING_ADMIN_CONFIRMED: ${REAL_TRADING_ADMIN_CONFIRMED:-false}
+      ACTIVE_ASSETS: ${ACTIVE_ASSETS:-EURUSD_otc,GBPUSD_otc,USDJPY_otc,AUDUSD_otc,EURJPY_otc}
+      ACTIVE_STRATEGY: ${ACTIVE_STRATEGY:-trend_pullback}
+      TRADE_AMOUNT: ${TRADE_AMOUNT:-1}
+      EXPIRATION_SECONDS: ${EXPIRATION_SECONDS:-60}
+      TIMEFRAME_SECONDS: ${TIMEFRAME_SECONDS:-60}
+      MAX_TRADES_TOTAL_PER_DAY: ${MAX_TRADES_TOTAL_PER_DAY:-5}
+      MAX_TRADES_PER_ASSET_PER_DAY: ${MAX_TRADES_PER_ASSET_PER_DAY:-1}
+      MAX_OPEN_TRADES_TOTAL: ${MAX_OPEN_TRADES_TOTAL:-1}
+      MAX_OPEN_TRADES_PER_ASSET: ${MAX_OPEN_TRADES_PER_ASSET:-1}
+      MAX_LOSSES_PER_DAY: ${MAX_LOSSES_PER_DAY:-2}
+      MAX_CONSECUTIVE_LOSSES: ${MAX_CONSECUTIVE_LOSSES:-2}
+      DAILY_STOP_LOSS: ${DAILY_STOP_LOSS:-10}
+      DAILY_TAKE_PROFIT: ${DAILY_TAKE_PROFIT:-20}
+      MIN_PAYOUT: ${MIN_PAYOUT:-0.7}
+      ONE_TRADE_PER_CANDLE: ${ONE_TRADE_PER_CANDLE:-true}
+      ONE_TRADE_PER_ASSET: ${ONE_TRADE_PER_ASSET:-true}
+      LOSS_COOLDOWN_SECONDS: ${LOSS_COOLDOWN_SECONDS:-900}
+      ASSET_COOLDOWN_SECONDS: ${ASSET_COOLDOWN_SECONDS:-300}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: pocket_option_bot_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-pocket_bot}
+      POSTGRES_USER: ${POSTGRES_USER:-pocket_bot}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:
